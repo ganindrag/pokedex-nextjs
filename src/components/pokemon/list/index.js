@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import useIntersection from "@/hooks/useIntersection";
 
 const getPokemonId = (link) => {
   const finder = link.match(/[^\/]+(?=\/$|$)/);
@@ -8,21 +9,41 @@ const getPokemonId = (link) => {
 const getPokemonImage = (id) =>
   `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${id}.png`;
 
+const pokemonPerPage = 20;
+
 const PokemonList = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [pokemon, setPokemon] = useState([]);
+  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
-    fetch("https://pokeapi.co/api/v2/pokemon")
+    setIsLoading(true);
+    fetch(
+      "https://pokeapi.co/api/v2/pokemon?" +
+        new URLSearchParams({
+          limit: pokemonPerPage,
+          offset,
+        })
+    )
       .then((res) => res.json())
       .then((res) => {
-        setPokemon(
-          res.results.map(({ name, url }) => ({
+        setIsLoading(false);
+        setPokemon((lastPokemon) => [
+          ...lastPokemon,
+          ...res.results.map(({ name, url }) => ({
             name,
             image: getPokemonImage(getPokemonId(url)),
-          }))
-        );
+          })),
+        ]);
       });
-  }, []);
+  }, [offset]);
+
+  const loadMoreRef = useRef();
+  const isIntersecting = useIntersection(isLoading ? null : loadMoreRef);
+
+  useEffect(() => {
+    if (isIntersecting) setOffset((prevOffset) => prevOffset + pokemonPerPage);
+  }, [isIntersecting, setOffset]);
 
   return (
     <div className="pokemon-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -37,6 +58,7 @@ const PokemonList = () => {
           <div className="p-1">{data.name}</div>
         </div>
       ))}
+      <div ref={loadMoreRef} />
     </div>
   );
 };
