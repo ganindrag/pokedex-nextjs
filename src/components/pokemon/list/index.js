@@ -1,37 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import useIntersection from "@/hooks/useIntersection";
 import PokemonCard from "../card";
-import { getPokemonId, getPokemonImage } from "@/utils/pokemon";
+import { fetchPokemonList } from "@/utils/pokemon";
 
 const pokemonPerPage = 20;
-
-const fetchPokemonList = ({ limit, offset, type }) => {
-  if (type !== "all") {
-    return fetch(`https://pokeapi.co/api/v2/type/${type}`)
-      .then((res) => res.json())
-      .then((res) => {
-        return res.pokemon.map(({ pokemon: { name, url } }) => ({
-          name,
-          image: getPokemonImage(getPokemonId(url)),
-        }));
-      });
-  } else {
-    return fetch(
-      "https://pokeapi.co/api/v2/pokemon?" +
-        new URLSearchParams({
-          limit: limit,
-          offset,
-        })
-    )
-      .then((res) => res.json())
-      .then((res) => {
-        return res.results.map(({ name, url }) => ({
-          name,
-          image: getPokemonImage(getPokemonId(url)),
-        }));
-      });
-  }
-};
 
 const PokemonList = ({ type }) => {
   const [isLoading, setIsLoading] = useState(false);

@@ -6,7 +6,9 @@ const Select = ({ options, onChange }) => {
       <select className={selectStyler.select} onChange={onChange}>
         <option>all</option>
         {options.map((opt) => (
-          <option value={opt.value}>{opt.label}</option>
+          <option value={opt.value} key={opt.value}>
+            {opt.label}
+          </option>
         ))}
       </select>
     </label>
