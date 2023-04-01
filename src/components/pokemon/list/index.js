@@ -1,14 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import useIntersection from "@/hooks/useIntersection";
 import PokemonCard from "../card";
-
-const getPokemonId = (link) => {
-  const finder = link.match(/[^\/]+(?=\/$|$)/);
-  return finder[0].padStart(3, "0");
-};
-
-const getPokemonImage = (id) =>
-  `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${id}.png`;
+import { getPokemonId, getPokemonImage } from "@/utils/pokemon";
 
 const pokemonPerPage = 20;
 
