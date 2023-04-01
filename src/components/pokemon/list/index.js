@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import useIntersection from "@/hooks/useIntersection";
+import PokemonCard from "../card";
 
 const getPokemonId = (link) => {
   const finder = link.match(/[^\/]+(?=\/$|$)/);
@@ -11,32 +12,54 @@ const getPokemonImage = (id) =>
 
 const pokemonPerPage = 20;
 
-const PokemonList = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [pokemon, setPokemon] = useState([]);
-  const [offset, setOffset] = useState(0);
-
-  useEffect(() => {
-    setIsLoading(true);
-    fetch(
+const fetchPokemonList = ({ limit, offset, type }) => {
+  if (type !== "all") {
+    return fetch(`https://pokeapi.co/api/v2/type/${type}`)
+      .then((res) => res.json())
+      .then((res) => {
+        return res.pokemon.map(({ pokemon: { name, url } }) => ({
+          name,
+          image: getPokemonImage(getPokemonId(url)),
+        }));
+      });
+  } else {
+    return fetch(
       "https://pokeapi.co/api/v2/pokemon?" +
         new URLSearchParams({
-          limit: pokemonPerPage,
+          limit: limit,
           offset,
         })
     )
       .then((res) => res.json())
       .then((res) => {
-        setIsLoading(false);
-        setPokemon((lastPokemon) => [
-          ...lastPokemon,
-          ...res.results.map(({ name, url }) => ({
-            name,
-            image: getPokemonImage(getPokemonId(url)),
-          })),
-        ]);
+        return res.results.map(({ name, url }) => ({
+          name,
+          image: getPokemonImage(getPokemonId(url)),
+        }));
       });
-  }, [offset]);
+  }
+};
+
+const PokemonList = ({ type }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [pokemon, setPokemon] = useState([]);
+  const [offset, setOffset] = useState(0);
+
+  useEffect(() => {
+    setPokemon([]);
+    setOffset(0);
+  }, [type]);
+
+  useEffect(() => {
+    setIsLoading(true);
+    fetchPokemonList({ limit: pokemonPerPage, offset, type }).then((res) => {
+      setIsLoading(false);
+      setPokemon((lastPokemon) => [
+        ...(type === "all" ? lastPokemon : []),
+        ...res,
+      ]);
+    });
+  }, [offset, type]);
 
   const loadMoreRef = useRef();
   const isIntersecting = useIntersection(isLoading ? null : loadMoreRef);
@@ -48,17 +71,9 @@ const PokemonList = () => {
   return (
     <div className="pokemon-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       {pokemon.map((data) => (
-        <div className="pokemon-card">
-          <div className="frame-image bg-gray-400">
-            <img
-              src={data.image}
-              className="w-full h-full object-contain object-center"
-            />
-          </div>
-          <div className="p-1">{data.name}</div>
-        </div>
+        <PokemonCard name={data.name} image={data.image} key={data.name} />
       ))}
-      <div ref={loadMoreRef} />
+      {type === "all" && <div ref={loadMoreRef} />}
     </div>
   );
 };

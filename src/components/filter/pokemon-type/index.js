@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Select from "@/components/shared/select";
 
-const PokemonTypeFilter = () => {
+const PokemonTypeFilter = ({ onChange }) => {
   const [pokemonType, setPokemonType] = useState([]);
 
   useEffect(() => {
@@ -14,7 +14,7 @@ const PokemonTypeFilter = () => {
       });
   }, []);
 
-  return <Select options={pokemonType} />;
+  return <Select options={pokemonType} onChange={onChange} />;
 };
 
 export default PokemonTypeFilter;

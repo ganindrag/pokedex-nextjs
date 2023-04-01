@@ -1,10 +1,10 @@
 import selectStyler from "./index.module.css";
 
-const Select = ({ options }) => {
+const Select = ({ options, onChange }) => {
   return (
     <label className={selectStyler.label}>
-      <select className={selectStyler.select}>
-        <option selected>all</option>
+      <select className={selectStyler.select} onChange={onChange}>
+        <option>all</option>
         {options.map((opt) => (
           <option value={opt.value}>{opt.label}</option>
         ))}

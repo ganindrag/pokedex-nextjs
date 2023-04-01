@@ -1,9 +1,12 @@
 import PokemonTypeFilter from "./pokemon-type";
 
-const Filter = () => {
+const Filter = ({ setTypeFilter }) => {
   return (
     <div className="filter p-1">
-      Type: <PokemonTypeFilter />
+      Type:{" "}
+      <PokemonTypeFilter
+        onChange={({ target }) => setTypeFilter(target.value)}
+      />
     </div>
   );
 };
